@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>بورتفوليو — مصمم جرافيك</title>
+
+  <!--
+    ملف واحد: HTML + CSS + JS
+    الهدف: صفحة بورتفوليو كاملة، RTL، مع فلاتر معرض، لايتبوكس، وتبديل ثيم دارك/فاتح.
+    ملاحظة: استبدل صور placeholder بصور أعمال العميل الحقيقية.
+  -->
+
+  <style>
+    /* ===========================
+       Reset بسيط وملاحظات عامة
+       =========================== */
+    :root{
+      /* Theme colors (light by default) */
+      --bg: #f6f8fa;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --text: #0f172a;
+      --accent: #2563eb; /* أزرق هادئ */
+      --accent-2: #06b6d4; /* تيفاني */
+      --glass: rgba(255,255,255,0.6);
+      --shadow: rgba(2,6,23,0.08);
+
+      /* sizes */
+      --container: 1200px;
+      --radius: 12px;
+    }
+
+    /* Dark theme overrides */
+    :root[data-theme="dark"]{
+      --bg: #0f1724;
+      --card: #111827;
+      --muted: #94a3b8;
+      --text: #e6eef8;
+      --accent: #4f46e5;
+      --accent-2: #06b6d4;
+      --glass: rgba(255,255,255,0.03);
+      --shadow: rgba(2,6,23,0.6);
+    }
+
+    /* Basic reset */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "Noto Naskh Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.5;
+      scroll-behavior:smooth;
+    }
+
+    /* Container */
+    .wrap{
+      max-width:var(--container);
+      margin:0 auto;
+      padding:28px 20px 80px;
+    }
+
+    /* ===========================
+       Header / Nav
+       =========================== */
+    header.site-header{
+      position:sticky;
+      top:12px;
+      z-index:999;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0.02));
+      /* in dark theme, this will be subtle because of CSS variables above */
+      border-radius:18px;
+      padding:8px 14px;
+      box-shadow: 0 8px 24px var(--shadow);
+      margin:12px 20px;
+    }
+    header .inner{
+      max-width:var(--container);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:6px 10px;
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo-mark{
+      width:52px;
+      height:52px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:800;
+      font-size:18px;
+      box-shadow: 0 6px 18px rgba(37,99,235,0.18);
+    }
+    .brand .text{
+      display:flex;
+      flex-direction:column;
+      line-height:1;
+    }
+    .brand .title{font-weight:800}
+    .brand .sub{font-size:12px; color:var(--muted)}
+
+    nav.main-nav ul{
+      list-style:none;
+      display:flex;
+      gap:18px;
+      margin:0;
+      padding:0;
+      align-items:center;
+    }
+    nav.main-nav a{
+      color:var(--text);
+      text-decoration:none;
+      font-weight:700;
+      padding:10px 12px;
+      border-radius:8px;
+    }
+    nav.main-nav a:hover{
+      background: linear-gradient(90deg, rgba(79,70,229,0.08), rgba(6,182,212,0.06));
+      color:var(--text);
+    }
+
+    /* Toggle theme button */
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .btn{
+      padding:8px 12px;
+      border-radius:8px;
+      border:1px solid rgba(0,0,0,0.06);
+      background:var(--card);
+      cursor:pointer;
+      font-weight:700;
+      box-shadow: 0 6px 18px var(--shadow);
+    }
+    .btn.ghost{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.04);
+    }
+
+    /* ===========================
+       Hero (البداية) 
+       =========================== */
+    .hero{
+      display:flex;
+      gap:20px;
+      align-items:center;
+      justify-content:space-between;
+      margin:26px 0 40px;
+      padding:28px;
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.12));
+      box-shadow: 0 12px 40px var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    :root[data-theme="dark"] .hero{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    }
+
+    .hero .left{
+      flex:1;
+      padding-right:10px;
+    }
+    .hero h1{
+      margin:0 0 8px;
+      font-size:32px;
+      letter-spacing:0.4px;
+    }
+    .hero p{margin:0; color:var(--muted); font-size:15px}
+    .hero .cta{
+      margin-top:18px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .cta .primary{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:white;
+      padding:10px 16px;
+      border-radius:10px;
+      font-weight:800;
+      border:none;
+      cursor:pointer;
+    }
+    .cta .secondary{
+      background:transparent;
+      border:1px solid rgba(0,0,0,0.06);
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      color:var(--text);
+    }
+
+    .hero .avatar{
+      width:160px;
+      height:160px;
+      border-radius:16px;
+      overflow:hidden;
+      flex-shrink:0;
+      box-shadow: 0 12px 32px var(--shadow);
+      border: 4px solid rgba(255,255,255,0.6);
+    }
+    .hero .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* small helper */
+    .muted{color:var(--muted)}
+
+    /* ===========================
+       Portfolio Section
+       =========================== */
+    section#portfolio{
+      margin-top:24px;
+    }
+
+    .section-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .section-header h2{
+      margin:0;
+      color:var(--accent);
+    }
+
+    /* Filters */
+    .filters{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .filters .chip{
+      padding:8px 14px;
+      border-radius:999px;
+      background:transparent;
+      border:1px solid rgba(0,0,0,0.06);
+      cursor:pointer;
+      font-weight:700;
+    }
+    .filters .chip.active{
+      background: linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:white;
+      box-shadow: 0 8px 24px rgba(6,182,212,0.08);
+      border: none;
+    }
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:16px;
+    }
+    @media (max-width:1000px){ .grid{ grid-template-columns: repeat(2,1fr); } }
+    @media (max-width:640px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      overflow:hidden;
+      position:relative;
+      cursor:pointer;
+      min-height:180px;
+      box-shadow: 0 8px 20px var(--shadow);
+      transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms;
+    }
+    .card:hover{ transform: translateY(-8px) scale(1.01); }
+
+    .card img{
+      width:100%;
+      height:220px;
+      object-fit:cover;
+      display:block;
+    }
+
+    .card .meta{
+      padding:12px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .card .meta .title{ font-weight:800 }
+    .card .meta .type{ font-size:13px; color:var(--muted) }
+
+    /* hover overlay */
+    .overlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(180deg, rgba(0,0,0,0.16), rgba(0,0,0,0.24));
+      opacity:0;
+      transition:opacity 180ms;
+      color:white;
+      font-weight:800;
+      font-size:15px;
+    }
+    .card:hover .overlay{ opacity:1 }
+
+    /* hint */
+    .hint{ color:var(--muted); font-size:13px; margin-top:10px }
+
+    /* ===========================
+       Lightbox (نافذة تكبير)
+       =========================== */
+    .lightbox{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background: rgba(2,6,23,0.6);
+      z-index:2000;
+      padding:28px;
+    }
+    .lightbox.open{ display:flex; }
+
+    .lightbox .panel{
+      max-width:1100px;
+      width:100%;
+      background:var(--card);
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow: 0 30px 80px rgba(2,6,23,0.6);
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:18px;
+      flex-direction:column;
+    }
+    .lightbox img{
+      width:100%;
+      max-height:70vh;
+      object-fit:contain;
+      display:block;
+      border-radius:8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    }
+    .lightbox .info{
+      width:100%;
+      padding-top:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .lightbox .info .text{ flex:1 }
+    .lightbox .info h3{ margin:0 0 6px; color:var(--accent) }
+    .lightbox .controls{ display:flex; gap:8px; align-items:center }
+    .lightbox .controls button{ padding:8px 12px; border-radius:8px; border:none; background:var(--accent); color:white; cursor:pointer; font-weight:800 }
+
+    /* ===========================
+       About & Contact
+       =========================== */
+    .about{
+      display:flex;
+      gap:18px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:8px;
+      padding:20px;
+      border-radius:12px;
+      background:var(--card);
+      box-shadow: 0 12px 36px var(--shadow);
+    }
+    .about .bio{ flex:1 }
+    .about .bio p{ color:var(--muted) }
+    .about .profile{
+      width:160px;
+      flex-shrink:0;
+    }
+    .about .profile img{ width:100%; height:100%; border-radius:12px; object-fit:cover; display:block }
+
+    /* contact */
+    .contact form{
+      display:grid;
+      gap:12px;
+      max-width:600px;
+      margin:0 auto;
+      background:var(--card);
+      padding:18px;
+      border-radius:12px;
+      box-shadow: 0 12px 36px var(--shadow);
+    }
+    .contact input, .contact textarea{
+      padding:12px;
+      border-radius:8px;
+      border:1px solid rgba(0,0,0,0.06);
+      background:var(--glass);
+      color:var(--text);
+      resize:vertical;
+    }
+    .contact button.submit{
+      padding:12px;
+      border-radius:10px;
+      border:none;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:white;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    /* footer */
+    footer.site-footer{
+      margin-top:28px;
+      text-align:center;
+      padding:18px;
+      color:var(--muted);
+    }
+
+    /* helper visually-hidden */
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    /* ===========================
+       Extra responsive tweaks
+       =========================== */
+    @media (max-width:880px){
+      .hero{ flex-direction:column; text-align:center; padding:20px }
+      .hero .avatar{ margin:10px auto 0 }
+      header .inner{ flex-direction:column; gap:10px }
+      nav.main-nav ul{ gap:8px }
+      .about{ flex-direction:column; text-align:center }
+    }
+    html{
+      scroll-behavior: smooth;
+    }
+
+
+
+    /* ===========================
+       End of styles
+       =========================== */
+  </style>
+</head>
+<body data-theme="light">
+  <!-- ===========================
+       Header
+       =========================== -->
+  <header class="site-header" role="banner" aria-label="رأس الموقع">
+    <div class="inner" role="navigation" aria-label="قائمة رئيسية">
+      <div class="brand" title="الشعار واسم المصمم">
+        <div class="logo-mark" aria-hidden="true">sam</div>
+        <div class="text">
+          <div class="title">sam designer</div>
+          <div class="sub">مصمم جرافيك — معرض أعمال</div>
+        </div>
+      </div>
+
+      <nav class="main-nav" aria-label="القسم الرئيسي">
+        <ul>
+          <li><a href="#hero">الرئيسية</a></li>
+          <li><a href="#portfolio">معرض الأعمال</a></li>
+          <li><a href="#about">عني</a></li>
+          <li><a href="#contact">تواصل</a></li>
+        </ul>
+      </nav>
+
+      <div class="actions" aria-hidden="false">
+        <button class="btn" id="themeToggle" aria-pressed="false" title="تبديل الثيم">🌙 دارك</button>
+        <button class="btn ghost" id="downloadBtn" title="تحميل السيرة">تحميل السيرة</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===========================
+       Wrap (المحتوى)
+       =========================== -->
+  <main class="wrap" id="siteMain">
+
+    <!-- HERO -->
+    <section class="hero" id="hero" aria-labelledby="heroTitle">
+      <div class="left">
+        <h1 id="heroTitle"> أنا المصمم سام - مرحبا بك في معرض أعمالي </h1>
+        <p class="muted">أعمل في تصميم الشعارات، إعلانات السوشال ميديا، ولوغوهات ألعاب. جودة وسرعة وتسليم احترافي.</p>
+
+        <div class="cta">
+          <button class="primary" onclick="document.getElementById('portfolio').scrollIntoView({behavior:'smooth'})">أعمالي</button>
+          <button class="secondary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">تواصل معي</button>
+        </div>
+
+        <div class="hint">نصيحة: جرّب الفلاتر في معرض الأعمال لعرض كل فئة على حدة.</div>
+      </div>
+
+      <div class="avatar" aria-hidden="true">
+        <img src="Picsart_25-09-28_23-10-30-076 (1).jpg" alt="صورة المصمم">
+      </div>
+    </section>
+
+    <!-- PORTFOLIO -->
+    <section id="portfolio" aria-labelledby="portfolioTitle">
+      <div class="section-header">
+        <h2 id="portfolioTitle">معرض الأعمال</h2>
+        <div class="filters" role="tablist" aria-label="فلاتر معرض الأعمال">
+          <button class="chip active" data-filter="all" role="tab" aria-selected="true">الكل</button>
+          <button class="chip" data-filter="social" role="tab">إعلانات سوشال ميديا</button>
+          <button class="chip" data-filter="logos" role="tab">شعارات</button>
+          <button class="chip" data-filter="games" role="tab">لوغو ألعاب</button>
+        </div>
+      </div>
+
+      <div class="grid" id="portfolioGrid" aria-live="polite" aria-atomic="true">
+        <!-- عناصر المعرض تُولد ديناميكياً عبر جافاسكربت -->
+        <!-- placeholder أثناء التحميل -->
+        <div style="grid-column:1/-1; text-align:center; color:var(--muted); padding:18px">يتم تحضير المعرض...</div>
+      </div>
+
+      <div class="hint" style="margin-top:12px">اضغط على أي صورة لعرضها بحجم كامل. استخدم الأسهم للتنقل داخل العرض المكبر (Left/Right) واضغط ESC للإغلاق.</div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" aria-labelledby="aboutTitle" style="margin-top:32px">
+      <h2 id="aboutTitle">عني</h2>
+      <div class="about" role="region" aria-label="معلومات عن المصمم">
+        <div class="bio">
+          <p style="margin-top:6px"><strong>أنا اسم المصمم</strong> — مصمم جرافيك شغوف بتحويل الأفكار لهويات بصرية واضحة وفعّالة. أعمل في تصميم الشعارات، الحملات الإعلانية للسوشال ميديا، والهوية المرئية للعلامات التجارية.</p>
+          <p class="muted" style="margin-top:12px">خبرة 4 سنوات في المجال، أستخدم أدوات مثل Adobe Illustrator, Photoshop, Figma — وأسعى لتقديم شغل عملي ومتميز.</p>
+
+          <ul style="margin-top:12px; color:var(--muted)">
+            <li>السرعة والالتزام بالمواعيد</li>
+            <li>تفاصيل دقيقة واهتمام بالألوان والطباعة</li>
+            <li>قابلية التعديل والتسليم بصيغ متعددة</li>
+          </ul>
+        </div>
+
+        <div class="profile">
+          <img src="https://via.placeholder.com/400x300?text=Workspace" alt="صورة مكان العمل">
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" aria-labelledby="contactTitle" style="margin-top:28px">
+      <h2 id="contactTitle">تواصل معي</h2>
+      <div class="contact" role="form">
+        <form id="contactForm" onsubmit="handleContact(event)">
+          <input type="text" id="name" placeholder="اسمك" required />
+          <input type="email" id="email" placeholder="البريد الإلكتروني" required />
+          <textarea id="message" rows="5" placeholder="رسالتك" required></textarea>
+          <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button type="submit" class="submit">إرسال الرسالة</button>
+            <button type="button" onclick="resetForm()" class="btn">تفريغ</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Lightbox markup (مخبأ، يظهر بواسطة JS) -->
+    <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="عرض الصورة">
+      <div class="panel" role="document">
+        <img id="lightboxImg" src="" alt="">
+        <div class="info">
+          <div class="text">
+            <h3 id="lightboxTitle">اسم العمل</h3>
+            <p id="lightboxDesc" class="muted">تفاصيل قصيرة عن العمل</p>
+          </div>
+          <div class="controls">
+            <button id="prevBtn" aria-label="السابق">◀</button>
+            <button id="nextBtn" aria-label="التالي">▶</button>
+            <button id="closeLight" aria-label="إغلاق">إغلاق ✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    
+    <footer class="site-footer" role="contentinfo" style="margin-top:36px">
+    </footer>
+
+  </main>
+
+  <script>
+
+ 
+
+
+(() => {
+  /* ===========================
+     بيانات المعرض (تستبدل بروابط العميل الحقيقية)
+     =========================== */
+  const portfolioData = [
+    /* إعلانات سوشال ميديا — 9 صور */
+    { id: 'social-1', category:'social', title:'حملة سوشال 1', img:'d1.jpeg', desc:'بوست ترويجي لمنتج A' },
+    { id: 'social-2', category:'social', title:'حملة سوشال 2', img:'d2.jpeg', desc:'تصميم قصص ومنشورات' },
+    { id: 'social-3', category:'social', title:'حملة سوشال 3', img:'d3.jpeg', desc:'حملة إطلاق منتج' },
+    { id: 'social-4', category:'social', title:'حملة سوشال 4', img:'d4.jpeg', desc:'تصميم Carousel' },
+    { id: 'social-5', category:'social', title:'حملة سوشال 5', img:'d5.jpeg', desc:'بوست اعلاني' },
+    { id: 'social-6', category:'social', title:'حملة سوشال 6', img:'d6.jpeg', desc:'تصاميم ترويجية' },
+    { id: 'social-7', category:'social', title:'حملة سوشال 7', img:'d7.jpeg', desc:'تصميم بانر' },
+    { id: 'social-8', category:'social', title:'حملة سوشال 8', img:'d8.jpeg', desc:'تصاميم سريعة' },
+    { id: 'social-9', category:'social', title:'حملة سوشال 9', img:'d9.jpeg', desc:'بوستات لأنستغرام' },
+
+    /* شعارات — 7 صور */
+    { id: 'logo-1', category:'logos', title:'شعار 1', img:'logo1.jpeg', desc:'هوية بسيطة ونظيفة' },
+    { id: 'logo-2', category:'logos', title:'شعار 2', img:'logo2.jpeg', desc:'شعار لعلامة محلية' },
+    { id: 'logo-3', category:'logos', title:'شعار 3', img:'logo3.jpeg', desc:'نظام علامي كامل' },
+    { id: 'logo-4', category:'logos', title:'شعار 4', img:'logo4.jpeg', desc:'تصميم أحادي اللون' },
+    { id: 'logo-5', category:'logos', title:'شعار 5', img:'logo5.jpeg', desc:'شعار هندسي' },
+    { id: 'logo-6', category:'logos', title:'شعار 6', img:'logo6.jpeg', desc:'هوية مطاعم' },
+    { id: 'logo-7', category:'logos', title:'شعار 7', img:'logo7.jpeg', desc:'نسخة أيقونية' },
+
+    /* لوغو ألعاب — 11 صور */
+    { id: 'game-1', category:'games', title:'لوغو لعبة 1', img:'g1.jpeg', desc:'لوغو لعبة مغامرة' },
+    { id: 'game-2', category:'games', title:'لوغو لعبة 2', img:'g2.jpeg', desc:'لوغو تنافسي' },
+    { id: 'game-3', category:'games', title:'لوغو لعبة 3', img:'g3.jpeg', desc:'لوغو فريق' },
+    { id: 'game-4', category:'games', title:'لوغو لعبة 4', img:'g4.jpeg', desc:'لوغو ستيل قوي' },
+    { id: 'game-5', category:'games', title:'لوغو لعبة 5', img:'g5.jpeg', desc:'هوية غيمر' },
+    { id: 'game-6', category:'games', title:'لوغو لعبة 6', img:'g6.jpeg', desc:'Logo Mask' },
+    { id: 'game-7', category:'games', title:'لوغو لعبة 7', img:'g7.jpeg', desc:'لوغو ديناميكي' },
+    { id: 'game-8', category:'games', title:'لوغو لعبة 8', img:'g8.jpeg', desc:'لوغو ملون' },
+    { id: 'game-9', category:'games', title:'لوغو لعبة 9', img:'g9.jpeg', desc:'لوغو بسيط' },
+    { id: 'game-10', category:'games', title:'لوغو لعبة 10', img:'g10.jpeg', desc:'لوغو فانتازي' },
+    { id: 'game-11', category:'games', title:'لوغو لعبة 11', img:'g11.jpeg', desc:'لوغو عصري' },
+  ];
+
+  /* ===========================
+     ريفرنس لعناصر DOM
+     =========================== */
+  const grid = document.getElementById('portfolioGrid');
+  const filterChips = Array.from(document.querySelectorAll('.filters .chip'));
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxTitle = document.getElementById('lightboxTitle');
+  const lightboxDesc = document.getElementById('lightboxDesc');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const closeLight = document.getElementById('closeLight');
+  const themeToggle = document.getElementById('themeToggle');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const contactForm = document.getElementById('contactForm');
+  const yearEl = document.getElementById('year');
+
+  let visibleItems = []; // العناصر المعروضة حالياً (حسب الفلتر)
+  let currentIndex = -1;  // الفهرس الحالي في الـ lightbox
+  let currentFiltered = 'all';
+
+  /* ===========================
+     دوال العرض والفلترة
+     =========================== */
+
+  // توليد العرض (grid) اعتماداً على الفلتر
+  function renderGrid(filter = 'all') {
+    if(!grid) return;
+    grid.innerHTML = ''; // تفريغ المحتوى
+    const items = portfolioData.filter(item => filter === 'all' ? true : item.category === filter);
+    visibleItems = items;
+
+    if(items.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.gridColumn = '1/-1';
+      empty.style.textAlign = 'center';
+      empty.style.padding = '18px';
+      empty.style.color = 'var(--muted)';
+      empty.textContent = 'لا توجد أعمال لعرضها في هذه الفئة.';
+      grid.appendChild(empty);
+      return;
+    }
+
+    items.forEach((item, idx) => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.tabIndex = 0;
+      card.setAttribute('role', 'button');
+    //   card.setAttribute('aria-label', ${item.title} — اضغط للعرض);
+
+      const img = document.createElement('img');
+      img.src = item.img;
+      img.alt = item.title;
+      img.loading = 'lazy';
+
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.textContent = 'عرض العمل';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const t = document.createElement('div');
+      t.className = 'title';
+      t.textContent = item.title;
+      const tp = document.createElement('div');
+      tp.className = 'type';
+      tp.textContent = (item.category === 'social') ? 'إعلانات سوشال ميديا' : (item.category === 'logos' ? 'شعارات' : 'لوغو ألعاب');
+
+      meta.appendChild(t);
+      meta.appendChild(tp);
+
+      card.appendChild(img);
+      card.appendChild(overlay);
+      card.appendChild(meta);
+
+      // فتح اللايتبوكس عند النقر أو Enter
+      card.addEventListener('click', () => openLightboxByIndex(idx));
+      card.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openLightboxByIndex(idx);
+        }
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  // تحديد الشيب النشط بصرياً
+  function setActiveChip(filter) {
+    filterChips.forEach(c => {
+      if(c.dataset.filter === filter) c.classList.add('active');
+      else c.classList.remove('active');
+    });
+    currentFiltered = filter;
+  }
+
+  /* ===========================
+     لايتبوكس - فتح، إغلاق، تنقّل
+     =========================== */
+
+  function openLightboxByIndex(index) {
+    if(index < 0 || index >= visibleItems.length) return;
+    currentIndex = index;
+    const it = visibleItems[currentIndex];
+    if(!it) return;
+    lightboxImg.src = it.img;
+    lightboxImg.alt = it.title;
+    lightboxTitle.textContent = it.title;
+    lightboxDesc.textContent = it.desc || '';
+    lightbox.classList.add('open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    // تعطيل سكرول الصفحة
+    document.body.style.overflow = 'hidden';
+    // تركز على زر الإغلاق لتحسين الوصول
+    closeLight?.focus();
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    lightboxImg.src = '';
+    document.body.style.overflow = '';
+    // إرجاع التركيز لأحد الشيب النشطة
+    document.querySelector('.filters .chip.active')?.focus();
+  }
+
+  function showNext() {
+    if(visibleItems.length === 0) return;
+    currentIndex = (currentIndex + 1) % visibleItems.length;
+    const it = visibleItems[currentIndex];
+    lightboxImg.src = it.img;
+    lightboxImg.alt = it.title;
+    lightboxTitle.textContent = it.title;
+    lightboxDesc.textContent = it.desc || '';
+  }
+
+  function showPrev() {
+    if(visibleItems.length === 0) return;
+    currentIndex = (currentIndex - 1 + visibleItems.length) % visibleItems.length;
+    const it = visibleItems[currentIndex];
+    lightboxImg.src = it.img;
+    lightboxImg.alt = it.title;
+    lightboxTitle.textContent = it.title;
+    lightboxDesc.textContent = it.desc || '';
+  }
+
+  /* ===========================
+     تهيئة الأحداث (Event Listeners)
+     =========================== */
+
+  function attachEvents() {
+    // فلتر الشيبز
+    filterChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const f = chip.dataset.filter;
+        setActiveChip(f);
+        renderGrid(f);
+      });
+      chip.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          chip.click();
+        }
+      });
+    });
+
+    // أزرار اللايتبوكس
+    nextBtn?.addEventListener('click', showNext);
+    prevBtn?.addEventListener('click', showPrev);
+    closeLight?.addEventListener('click', closeLightbox);
+
+    // إغلاق عند الضغط على الخلفية
+    lightbox?.addEventListener('click', (e) => {
+      if(e.target === lightbox) closeLightbox();
+    });
+
+    // كيبورد: Esc, ArrowRight, ArrowLeft
+    document.addEventListener('keydown', (e) => {
+      if(lightbox?.classList.contains('open')) {
+        if(e.key === 'Escape') closeLightbox();
+        if(e.key === 'ArrowRight') showNext();
+        if(e.key === 'ArrowLeft') showPrev();
+      }
+    });
+
+    // تبديل الثيم
+    themeToggle?.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = current === 'light' ? 'dark' : 'light';
+      setTheme(next);
+      try { localStorage.setItem('site-theme', next); } catch(e){}
+    });
+
+    // زر تحميل السيرة (توليد ملف نصي بسيط)
+    downloadBtn?.addEventListener('click', () => {
+      const cvContent = [
+        'السيرة الذاتية — اسم المصمم',
+        'المسمى: مصمم جرافيك',
+        'الخبرة: 4 سنوات',
+        'المهارات: تصميم شعارات، تصاميم سوشال ميديا، هوية بصرية',
+        'البريد: example@example.com'
+      ].join('\n');
+
+      const blob = new Blob([cvContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'CV-اسم-المصمم.txt';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // نموذج التواصل
+    contactForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = (document.getElementById('name') || {}).value || '';
+      const email = (document.getElementById('email') || {}).value || '';
+      const message = (document.getElementById('message') || {}).value || '';
+
+      if(!name.trim() || !email.trim() || !message.trim()) {
+        alert('رجاءً املأ جميع الحقول');
+        return;
+      }
+      // هنا عادة ترسل البيانات إلى السيرفر — في هذه النسخة نعرض رسالة فقط
+      alert('تم إرسال الرسالة. شكرًا لتواصلك!');
+      contactForm.reset();
+    });
+  }
+
+  /* ===========================
+     Theme handling
+     =========================== */
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
+    if(themeToggle) {
+      themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+      themeToggle.textContent = theme === 'dark' ? '☀️ فاتح' : '🌙 دارك';
+    }
+  }
+
+  /* ===========================
+     Initialization
+     =========================== */
+  function init() {
+    // سنة الفوتر
+    if(yearEl) yearEl.textContent = new Date().getFullYear();
+
+    // استعادة الثيم
+    try {
+      const saved = localStorage.getItem('site-theme');
+      if(saved) setTheme(saved);
+      else setTheme('light');
+    } catch(e) {
+      setTheme('light');
+    }
+
+    // وصل الأحداث
+    attachEvents();
+
+    // ريندر أولي - عرض كل العناصر
+    setActiveChip('all');
+    renderGrid('all');
+  }
+
+  // تأكد إن الـ DOM جاهز
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // تصدير بسيط في حال بدك تستعمل الدوال من مكان ثاني (اختياري)
+  window.__portfolio = {
+    renderGrid,
+    setActiveChip,
+    openLightboxByIndex,
+    closeLightbox,
+    showNext,
+    showPrev
+  };
+
+})();
+
+
+
+  </script>
+  <!-- ===========================
+       JavaScript — منظم ومفصل
+       =========================== 
